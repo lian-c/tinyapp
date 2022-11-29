@@ -28,4 +28,11 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase}
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]}
+  res.render("urls_show", templateVars);
+  console.log(req.params)
+
  });
