@@ -47,7 +47,6 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]}
   res.render("urls_show", templateVars);
-  // console.log(req.params)  
 });
 
 app.post("/urls", (req, res) => {
@@ -56,11 +55,19 @@ app.post("/urls", (req, res) => {
     newURL.longURL = "http://" + newURL.longURL
   }
   res.render("urls_show", newURL);
-  console.log("urls_show", newURL);
   urlDatabase[newURL.id] = newURL.longURL
 })
 
 app.get("/u/:id", (req, res) => {
   longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  const keys = Object.keys(urlDatabase);
+  for (let key of keys){
+    if (key == req.params.id){
+      res.redirect(longURL);
+      return;
+    }
+    else{
+      res.send("Invalid shortURL")
+    }
+  }
 });
