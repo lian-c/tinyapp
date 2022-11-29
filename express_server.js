@@ -52,7 +52,11 @@ app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.
 
 app.post("/urls", (req, res) => {
   const newURL = {id: generateRandomString(), longURL: req.body.longURL,}
+  if (!newURL.longURL.includes("http")){
+    newURL.longURL = "http://" + newURL.longURL
+  }
   res.render("urls_show", newURL);
+  console.log("urls_show", newURL);
   urlDatabase[newURL.id] = newURL.longURL
 })
 
