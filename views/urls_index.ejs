@@ -25,6 +25,8 @@ crossorigin="anonymous"
       <th scope="col">Short URL ID</th>
       <th scope="col">Long URL</th>
       <th scope="col">Delete</th>
+      <th scope="col">Edit</th>
+
     </tr>
   </thead>
   <tbody>
@@ -35,7 +37,15 @@ crossorigin="anonymous"
         <td><form method="POST" action="/urls/<%= id %>/delete">
           <button type="submit">Delete</button>
         </form></td>
-      </tr>
+        <form method="POST" action="/urls/<%= id %>/edit">
+        <td><input class="form-control"
+          type="text"
+          name="longURL"
+          value = <%= urls[id] %> /></td>
+          <td>
+          <button type="submit">Edit</button>
+          </form></td>
+        </tr>
       <% } %>
      
   </tbody>

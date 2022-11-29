@@ -82,5 +82,10 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
   delete urlDatabase[shortURL];
-  res.redirect(301,"/urls/new");
+  res.redirect(301,"/urls");
+});
+app.post("/urls/:id/edit", (req, res) => {
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(301,"/urls");
 });
