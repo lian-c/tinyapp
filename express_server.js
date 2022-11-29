@@ -8,12 +8,12 @@ const urlDatabase = {
 };
 
 const generateRandomString = () => {
-  const alphaNumeric = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  const alphaNumeric = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const result = [];
-  for (let i = 0; i < 6; i ++){
-    const index = Math.floor(Math.random() * (alphaNumeric.length))
-    result.push(alphaNumeric[index])
-  } return result.join("")
+  for (let i = 0; i < 6; i ++) {
+    const index = Math.floor(Math.random() * (alphaNumeric.length));
+    result.push(alphaNumeric[index]);
+  } return result.join("");
 };
 
 app.set("view engine", "ejs");
@@ -36,38 +36,50 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase}
+  const templateVars = { urls: urlDatabase};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  res.status(200);
   res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]}
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const newURL = {id: generateRandomString(), longURL: req.body.longURL,}
-  if (!newURL.longURL.includes("http")){
-    newURL.longURL = "http://" + newURL.longURL
+  // Object.values(urlDatabase).forEach((url) => { //if url is already shortened
+  //   if (req.body.longURL === url) {
+  //     res.redirect("/urls");
+  //   }
+  //   return;
+  // });
+  const newURL = {id: generateRandomString(), longURL: req.body.longURL,};
+  if (!newURL.longURL.includes("http")) {
+    newURL.longURL = "http://" + newURL.longURL;
   }
   res.render("urls_show", newURL);
-  urlDatabase[newURL.id] = newURL.longURL
-})
+  urlDatabase[newURL.id] = newURL.longURL;
+  res.status(200);
+});
 
 app.get("/u/:id", (req, res) => {
-  longURL = urlDatabase[req.params.id];
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
   const keys = Object.keys(urlDatabase);
-  for (let key of keys){
-    if (key == req.params.id){
+  for (let key of keys) {
+    if (key == shortURL) {
       res.redirect(longURL);
       return;
     }
-    else{
-      res.send("Invalid shortURL")
-    }
   }
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  const shortURL = req.params.id;
+  delete urlDatabase[shortURL];
+  res.status(200).redirect("/urls");
 });
