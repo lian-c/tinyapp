@@ -61,8 +61,8 @@ app.post("/urls", (req, res) => {
   if (!newURL.longURL.includes("http")) {
     newURL.longURL = "http://" + newURL.longURL;
   }
-  res.render("urls_show", newURL);
   urlDatabase[newURL.id] = newURL.longURL;
+  res.render("urls_show", newURL);
   res.status(200);
 });
 
@@ -71,15 +71,16 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[shortURL];
   const keys = Object.keys(urlDatabase);
   for (let key of keys) {
-    if (key == shortURL) {
-      res.redirect(longURL);
+    if (key === shortURL) {
+      res.redirect(302, longURL);
       return;
     }
   }
+  res.redirect(400,"/urls/new")
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
   delete urlDatabase[shortURL];
-  res.status(200).redirect("/urls");
+  res.redirect(301,"/urls/new");
 });
