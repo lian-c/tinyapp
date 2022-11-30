@@ -10,6 +10,18 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "easytohack",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "12345678",
+  },
+};
 
 const generateRandomString = () => {
   const alphaNumeric = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -103,4 +115,14 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = { username: req.cookies["username"]};
   res.render("urls_register", templateVars)
+});
+
+app.post("/register", (req, res) => {
+ const email = req.body.email;
+ const password = req.body.password;
+ const id = generateRandomString();
+ users[id] = {id, email, password}
+ res.cookie("user_id", id)
+ console.log(users)
+ res.redirect("/urls")
 });
