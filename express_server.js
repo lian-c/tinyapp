@@ -44,7 +44,8 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   res.status(200);
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 
@@ -65,11 +66,11 @@ app.post("/urls", (req, res) => {
   });
   
   app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
-    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
     res.render("urls_show", templateVars);
   });
   app.post("/urls/:id", (req, res) => {
-    const url = {id: req.params.id, longURL:urlDatabase[req.params.id]}
+    const url = {id: req.params.id, longURL:urlDatabase[req.params.id], username: req.cookies["username"]}
     res.render("urls_show", url)
   })
 app.get("/u/:id", (req, res) => {
