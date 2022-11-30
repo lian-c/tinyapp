@@ -45,27 +45,31 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
-  res.render("urls_show", templateVars);
-});
 
 app.post("/urls", (req, res) => {
   // Object.values(urlDatabase).forEach((url) => { //if url is already shortened
   //   if (req.body.longURL === url) {
-  //     res.redirect("/urls");
-  //   }
-  //   return;
-  // });
-  const newURL = {id: generateRandomString(), longURL: req.body.longURL,};
-  if (!newURL.longURL.includes("http")) {
-    newURL.longURL = "http://" + newURL.longURL;
-  }
-  urlDatabase[newURL.id] = newURL.longURL;
-  res.render("urls_show", newURL);
-  res.status(200);
-});
-
+    //     res.redirect("/urls");
+    //   }
+    //   return;
+    // });
+    const newURL = {id: generateRandomString(), longURL: req.body.longURL,};
+    if (!newURL.longURL.includes("http")) {
+      newURL.longURL = "http://" + newURL.longURL;
+    }
+    urlDatabase[newURL.id] = newURL.longURL;
+    res.render("urls_show", newURL);
+    res.status(200);
+  });
+  
+  app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
+    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+    res.render("urls_show", templateVars);
+  });
+  app.post("/urls/:id", (req, res) => {
+    const url = {id: req.params.id, longURL:urlDatabase[req.params.id]}
+    res.render("urls_show", url)
+  })
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
