@@ -119,10 +119,6 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect(301,"/urls");
 });
 
-app.post("/login", (req, res) => {
-  // res.cookie("username",req.body.username)
-  res.redirect("/register")
-})
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id")
@@ -136,16 +132,29 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
- const email = req.body.email;
- const password = req.body.password;
- if (email === "" || password === ""){
-  return res.status(404).send('Please check your email or password');
- }
- if (getUserByEmail(email) !== null ){
-  return res.status(404).send('This email has already been registered');
- }
- const id = generateRandomString();
- users[id] = {id, email, password}
- res.cookie("user_id", id)
- res.redirect("/urls")
+  const email = req.body.email;
+  const password = req.body.password;
+  if (email === "" || password === ""){
+    return res.status(404).send('Please check your email or password');
+  }
+  if (getUserByEmail(email) !== null ){
+    return res.status(404).send('This email has already been registered');
+  }
+  const id = generateRandomString();
+  users[id] = {id, email, password}
+  res.cookie("user_id", id)
+  res.redirect("/urls")
+});
+
+app.get("/login", (req, res) => {
+  const loggedUser = req.cookies.user_id
+  const templateVars = { users , loggedUser};
+  res.render("urls_login", templateVars)
+});
+
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  res.redirect("/urls")
 });
