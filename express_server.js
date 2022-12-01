@@ -1,10 +1,16 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const app = express();
 const morgan = require('morgan');
 const bcrypt = require("bcryptjs");
 //middleware
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["beluga"],// secret keys 
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 app.use(morgan('dev'));
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -90,7 +96,7 @@ app.get("/urls.json", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   if (!loggedUser) {
     return res.status(401).send('401 - Please login in order to view this page.');
   }
@@ -101,7 +107,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   res.status(200);
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   if (!loggedUser) {
     res.redirect("/login");
   }
@@ -111,7 +117,7 @@ app.get("/urls/new", (req, res) => {
 
 
 app.post("/urls", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   if (!loggedUser) {
     return res.status(401).send('401 - Please login in order to shorten URL.');
   }
@@ -125,7 +131,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   const id = req.params.id;
   if (!loggedUser) {
     return res.status(401).send('401 - Please login in order to view this page');
@@ -143,7 +149,7 @@ app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.
 });
 
 app.post("/urls/:id", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   const id = req.params.id;
   if (!loggedUser) {
     return res.status(401).send('401 - Please login in order to view this page');
@@ -174,7 +180,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   const shortURL = req.params.id;
   if(urlDatabase[shortURL] === undefined ){
     return res.status(404).send("404 - Short URL ID not found, please check the ID.");
@@ -190,7 +196,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/urls/:id/edit", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   const shortURL = req.params.id;
   if(urlDatabase[shortURL] === undefined ){
     return res.status(404).send("404 - Short URL ID not found, please check the ID.");
@@ -207,12 +213,12 @@ app.post("/urls/:id/edit", (req, res) => {
 
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   if (loggedUser) {
     return res.redirect("/urls");
   }
@@ -233,12 +239,12 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   users[id] = { id, email, password }; //saves the hash p/w
   // console.log(users) password hashed
-  res.cookie("user_id", id);
+  req.session.user_id = id;
   res.redirect("/urls");
 });
 
 app.get("/login", (req, res) => {
-  const loggedUser = req.cookies.user_id;
+  const loggedUser = req.session.user_id;
   if (loggedUser) {
     return res.redirect("/urls");
   }
@@ -250,7 +256,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   if (getUserByEmail(email)) {
     if (bcrypt.compareSync(req.body.password,(getUserByEmail(email).password))) { //order is important
-      res.cookie("user_id", getUserByEmail(email).id);
+      req.session.user_id =  getUserByEmail(email).id;
       return res.redirect("/urls");
     } return res.status(403).send('403 - Incorrect password');
   }
