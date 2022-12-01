@@ -55,13 +55,13 @@ const getUserByEmail = (email) => {
   return null;
 };
 
-const urlsForUser = (id) => { //enter userID and use new variable that can be changed keeping the id, longURL 
-  let result = {}
+const urlsForUser = (id) => { //enter userID and use new variable that can be changed keeping the id, longURL
+  let result = {};
   for (let user of Object.keys(urlDatabase)) {
     if (urlDatabase[user].userID === id) {
-      result[user] = urlDatabase[user].longURL
+      result[user] = urlDatabase[user].longURL;
     }
-  } return (result)
+  } return (result);
 };
 // console.log(urlsForUser("user2RandomID"))
 // console.log(urlsForUser("userRandomID"))
@@ -73,7 +73,7 @@ const urlsForUser = (id) => { //enter userID and use new variable that can be ch
 //   }
 //   return false;
 // }
-// app.get and post 
+// app.get and post
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -92,8 +92,8 @@ app.get("/urls", (req, res) => {
   if (!loggedUser) {
     return res.status(401).send('401 - Please login in order to view this page.');
   }
-  const linkArray = urlsForUser(loggedUser)
-  const templateVars = { urls: linkArray, users, loggedUser, urlDatabase };
+  const userLinks = urlsForUser(loggedUser);
+  const templateVars = { urls: userLinks, users, loggedUser};
   res.render("urls_index", templateVars);
 });
 
@@ -117,35 +117,47 @@ app.post("/urls", (req, res) => {
   if (!newURL.longURL.includes("http")) {
     newURL.longURL = "http://" + newURL.longURL;
   }
-  urlDatabase[newURL.id] = { longURL: newURL.longURL, userID: loggedUser }
+  urlDatabase[newURL.id] = { longURL: newURL.longURL, userID: loggedUser };
   res.render("urls_show", newURL);
   res.status(200);
 });
 
 app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
   const loggedUser = req.cookies.user_id;
+  const id = req.params.id;
   if (!loggedUser) {
     return res.status(401).send('401 - Please login in order to view this page');
   }
-  const id = req.params.id
-  const templateVars = { id, longURL: urlDatabase[req.params.id].longURL, users, loggedUser };
-  console.log(templateVars)
-  if(idToLoggedUser(loggedUser, id)){ //if this is true
+
+  const templateVars = { id, longURL: urlDatabase[id], users, loggedUser };
+  
+  if (templateVars.longURL === undefined) { //this means id invalid because no longURL
+    return res.status(404).send("404 - Short URL ID not found, please go back and try again.");
+  }
+  if (urlsForUser(loggedUser)[id]) { // if it's true
     return res.render("urls_show", templateVars);
   }
-  if (templateVars.longURL === undefined) { //this means id invalid because no longURL
-    return res.status(404).send("404 - Short URL ID not found, please go back and try again.")
-  }
   return res.status(401).send('401 - You are not authorized to view this page');
-  
-    
-  
 });
+
 app.post("/urls/:id", (req, res) => {
   const loggedUser = req.cookies.user_id;
-  const url = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, users, loggedUser };
-  res.render("urls_show", url);
+  const id = req.params.id;
+  if (!loggedUser) {
+    return res.status(401).send('401 - Please login in order to view this page');
+  }
+
+  const url = { id, longURL: urlDatabase[id].longURL, users, loggedUser };
+  
+  if (url.longURL === undefined) { //this means id invalid because no longURL
+    return res.status(404).send("404 - Short URL ID not found, please go back and try again.");
+  }
+  if (urlsForUser(loggedUser)[id]) { // if it's true
+    return res.render("urls_show", url);
+  }
+  return res.status(401).send('401 - You are not authorized to view this page');
 });
+
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL].longURL;
@@ -160,11 +172,23 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+  const loggedUser = req.cookies.user_id;
   const shortURL = req.params.id;
-  delete urlDatabase[shortURL];
-  res.redirect(301, "/urls");
+  if(urlDatabase[shortURL] === undefined ){
+    return res.status(404).send("404 - Short URL ID not found, please check the ID.");
+  }
+  if(!loggedUser){
+    return res.status(401).send('401 - Please login in order to view this page');
+  }
+  if (urlsForUser(loggedUser)[shortURL]) { // if it's true
+    delete urlDatabase[shortURL];
+    res.redirect(301, "/urls");
+  }
+  return res.status(401).send('401 - You are not authorized to delete this URL');
 });
+
 app.post("/urls/:id/edit", (req, res) => {
+  const loggedUser = req.cookies.user_id;
   const shortURL = req.params.id;
   urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect(301, "/urls");

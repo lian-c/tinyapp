@@ -30,10 +30,10 @@ crossorigin="anonymous"
     </tr>
   </thead>
   <tbody>
-    <% for (let id of urls) { %>
+    <% for (let id in urls) { %>
       <tr>
         <td><%= id %></td>
-        <td><%= urlDatabase[id].longURL %></td>
+        <td><%= urls[id] %></td>
         <td>
           <form method="POST" action="/urls/<%=id %>">
             <button type="submit" class="btn btn-outline-primary">Edit</button>
