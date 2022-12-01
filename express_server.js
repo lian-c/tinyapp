@@ -36,9 +36,10 @@ const getUserByEmail = (email) => {
   for (let id of Object.keys(users)) { 
     // console.log(users[id].email)
     if (users[id].email === email) { 
-      console.log(id);
-      return id;
+      // console.log(users[id]);
+      return users[id];
     }
+    return null;
   }
 };
 
@@ -139,6 +140,9 @@ app.post("/register", (req, res) => {
  const password = req.body.password;
  if (email === "" || password === ""){
   return res.status(404).send('Please check your email or password');
+ }
+ if (getUserByEmail(email) !== null ){
+  return res.status(404).send('This email has already been registered');
  }
  const id = generateRandomString();
  users[id] = {id, email, password}
