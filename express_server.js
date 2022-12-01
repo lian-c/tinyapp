@@ -7,8 +7,14 @@ app.use(morgan('dev'));
 const port = 8080;// default port 8080
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca", 
+    userID: "userRandomID"
+},
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "user2RandomID"
+}
 };
 const users = {
   userRandomID: {
@@ -73,7 +79,6 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
   }
   const templateVars = { users, loggedUser};
-  console.log(templateVars);
   res.render("urls_new", templateVars);
 });
 
@@ -87,14 +92,14 @@ app.post("/urls", (req, res) => {
   if (!newURL.longURL.includes("http")) {
     newURL.longURL = "http://" + newURL.longURL;
   }
-  urlDatabase[newURL.id] = newURL.longURL;
+  urlDatabase[newURL.id] = {longURL: newURL.longURL, userID: loggedUser}
   res.render("urls_show", newURL);
   res.status(200);
 });
   
 app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
   const loggedUser = req.cookies.user_id;
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, loggedUser};
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, users, loggedUser};
   if (templateVars.longURL === undefined){ //this means id invalid because no longURL
     return res.status(404).send("404 - Short URL ID not found, please go back and try again.")
   }
@@ -102,12 +107,12 @@ app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.
 });
 app.post("/urls/:id", (req, res) => {
   const loggedUser = req.cookies.user_id;
-  const url = {id: req.params.id, longURL:urlDatabase[req.params.id], users,loggedUser};
+  const url = {id: req.params.id, longURL:urlDatabase[req.params.id].longURL, users,loggedUser};
   res.render("urls_show", url);
 });
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   const keys = Object.keys(urlDatabase);
   for (let key of keys) {
     if (key === shortURL) {
@@ -125,7 +130,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 app.post("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect(301,"/urls");
 });
 
