@@ -1,9 +1,9 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
-const morgan = require('morgan')
-app.use(cookieParser())
-app.use(morgan('dev'))
+const morgan = require('morgan');
+app.use(cookieParser());
+app.use(morgan('dev'));
 const port = 8080;// default port 8080
 
 const urlDatabase = {
@@ -49,35 +49,35 @@ app.get("/urls.json", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { urls: urlDatabase, users};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   res.status(200);
-  const templateVars = { username: req.cookies["username"]};
+  const templateVars = { users};
   res.render("urls_new", templateVars);
 });
 
 
 app.post("/urls", (req, res) => {
-    const newURL = {id: generateRandomString(), longURL: req.body.longURL,};
-    if (!newURL.longURL.includes("http")) {
-      newURL.longURL = "http://" + newURL.longURL;
-    }
-    urlDatabase[newURL.id] = newURL.longURL;
-    res.render("urls_show", newURL);
-    res.status(200);
-  });
+  const newURL = {id: generateRandomString(), longURL: req.body.longURL,};
+  if (!newURL.longURL.includes("http")) {
+    newURL.longURL = "http://" + newURL.longURL;
+  }
+  urlDatabase[newURL.id] = newURL.longURL;
+  res.render("urls_show", newURL);
+  res.status(200);
+});
   
-  app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
-    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
-    res.render("urls_show", templateVars);
-  });
-  app.post("/urls/:id", (req, res) => {
-    const url = {id: req.params.id, longURL:urlDatabase[req.params.id], username: req.cookies["username"]}
-    res.render("urls_show", url)
-  })
+app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users};
+  res.render("urls_show", templateVars);
+});
+app.post("/urls/:id", (req, res) => {
+  const url = {id: req.params.id, longURL:urlDatabase[req.params.id], users};
+  res.render("urls_show", url);
+});
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
@@ -88,7 +88,7 @@ app.get("/u/:id", (req, res) => {
       return;
     }
   }
-  res.redirect(400,"/urls/new")
+  res.redirect(400,"/urls/new");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -103,26 +103,26 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("username",req.body.username)
-  res.redirect("/urls")
-})
+  // res.cookie("username",req.body.username)
+  res.redirect("/urls");
+});
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")
-  res.redirect("/urls")
-})
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
 
 app.get("/register", (req, res) => {
-  const templateVars = { username: req.cookies["username"]};
-  res.render("urls_register", templateVars)
+  const templateVars = { users };
+  res.render("urls_register", templateVars);
 });
 
 app.post("/register", (req, res) => {
- const email = req.body.email;
- const password = req.body.password;
- const id = generateRandomString();
- users[id] = {id, email, password}
- res.cookie("user_id", id)
- console.log(users)
- res.redirect("/urls")
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = generateRandomString();
+  users[id] = {id, email, password};
+  res.cookie("user_id", id);
+  console.log(users);
+  res.redirect("/urls");
 });
