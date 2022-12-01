@@ -2,6 +2,8 @@ const express = require("express");
 const cookieParser = require('cookie-parser');
 const app = express();
 const morgan = require('morgan');
+const bcrypt = require("bcryptjs");
+//middleware
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.set("view engine", "ejs");
@@ -26,12 +28,12 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "easytohack",
+    password: "$2a$10$hD8vsFGCo7OqltkfOA3OH.ne0dcOi30702KC4920GVg93VY8uuE7m", //password easytohack typing it for testing purpose
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "12345678",
+    password: "$2a$10$hD8vsFGCo7OqltkfOA3OH.rdf6hJuUWPyLLF3TjjW1RrXYqBIzrXW", //password 12345678
   }
 };
 //all the helper functions
@@ -220,7 +222,8 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const salt = bcrypt.genSaltSync(10);
+  const password = bcrypt.hashSync(req.body.password, salt); //hash the password
   if (email === "" || password === "") {
     return res.status(404).send('Please check your email or password');
   }
@@ -228,7 +231,8 @@ app.post("/register", (req, res) => {
     return res.status(404).send('This email has already been registered');
   }
   const id = generateRandomString();
-  users[id] = { id, email, password };
+  users[id] = { id, email, password }; //saves the hash p/w
+  // console.log(users) password hashed
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
@@ -244,9 +248,8 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
   if (getUserByEmail(email)) {
-    if (getUserByEmail(email).password === password) {
+    if (bcrypt.compareSync(req.body.password,(getUserByEmail(email).password))) { //order is important
       res.cookie("user_id", getUserByEmail(email).id);
       return res.redirect("/urls");
     } return res.status(403).send('403 - Incorrect password');
