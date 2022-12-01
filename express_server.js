@@ -20,7 +20,7 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "12345678",
-  },
+  }
 };
 
 const generateRandomString = () => {
@@ -42,6 +42,7 @@ const getUserByEmail = (email) => {
   }
   return null;
 };
+
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -68,6 +69,9 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.status(200);
   const loggedUser = req.cookies.user_id;
+  if (!loggedUser){
+    res.redirect("/login");
+  }
   const templateVars = { users, loggedUser};
   console.log(templateVars);
   res.render("urls_new", templateVars);
@@ -76,6 +80,9 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const loggedUser = req.cookies.user_id;
+  if(!loggedUser){
+    return res.status(401).send('401 - Please login in order to shorten URL.');
+  }
   const newURL = {id: generateRandomString(), longURL: req.body.longURL, users, loggedUser};
   if (!newURL.longURL.includes("http")) {
     newURL.longURL = "http://" + newURL.longURL;
@@ -88,6 +95,9 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => { //:id doesn't have to be id but req.params.XX has to match :XX and on the ejs file as well
   const loggedUser = req.cookies.user_id;
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, loggedUser};
+  if (templateVars.longURL === undefined){ //this means id invalid because no longURL
+    return res.status(404).send("404 - Short URL ID not found, please go back and try again.")
+  }
   res.render("urls_show", templateVars);
 });
 app.post("/urls/:id", (req, res) => {
@@ -127,6 +137,9 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const loggedUser = req.cookies.user_id;
+  if (loggedUser){
+    return res.redirect("/urls");
+  }
   const templateVars = { users , loggedUser};
   res.render("urls_register", templateVars);
 });
@@ -148,6 +161,9 @@ app.post("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const loggedUser = req.cookies.user_id;
+  if (loggedUser){
+    return res.redirect("/urls");
+  }
   const templateVars = { users , loggedUser};
   res.render("urls_login", templateVars);
 });
@@ -159,7 +175,7 @@ app.post("/login", (req, res) => {
     if (getUserByEmail(email).password === password) {
       res.cookie("user_id", getUserByEmail(email).id);
       return res.redirect("/urls");
-    } return res.status(403).send('Incorrect password');
+    } return res.status(403).send('403 - Incorrect password');
   }
-  return res.status(403).send('Email not found');
+  return res.status(403).send('403 - Email not found');
 });
