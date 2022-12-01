@@ -190,8 +190,17 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const loggedUser = req.cookies.user_id;
   const shortURL = req.params.id;
-  urlDatabase[shortURL].longURL = req.body.longURL;
-  res.redirect(301, "/urls");
+  if(urlDatabase[shortURL] === undefined ){
+    return res.status(404).send("404 - Short URL ID not found, please check the ID.");
+  }
+  if(!loggedUser){
+    return res.status(401).send('401 - Please login in order to edit this URL');
+  }
+  if (urlsForUser(loggedUser)[shortURL]) { // if it's true
+    urlDatabase[shortURL].longURL = req.body.longURL;
+    res.redirect(301, "/urls");
+  }
+  return res.status(401).send('401 - You are not authorized to edit this URL');
 });
 
 
