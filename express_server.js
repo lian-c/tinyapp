@@ -32,6 +32,16 @@ const generateRandomString = () => {
   } return result.join("");
 };
 
+const getUserByEmail = (email) => { 
+  for (let id of Object.keys(users)) { 
+    // console.log(users[id].email)
+    if (users[id].email === email) { 
+      console.log(id);
+      return id;
+    }
+  }
+};
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
@@ -127,6 +137,9 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
  const email = req.body.email;
  const password = req.body.password;
+ if (email === "" || password === ""){
+  return res.status(404).send('Please check your email or password');
+ }
  const id = generateRandomString();
  users[id] = {id, email, password}
  res.cookie("user_id", id)
