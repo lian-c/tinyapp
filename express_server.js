@@ -4,8 +4,10 @@ const app = express();
 const morgan = require('morgan');
 app.use(cookieParser());
 app.use(morgan('dev'));
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }));
 const port = 8080;// default port 8080
-
+// All the databases
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca", 
@@ -14,8 +16,12 @@ const urlDatabase = {
   "9sm5xK": {
     longURL: "http://www.google.com",
     userID: "user2RandomID"
+}, "9fe9js": {
+  longURL: "http://www.cheese.ca",
+  userID: "user2RandomID"
 }
 };
+
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -28,7 +34,7 @@ const users = {
     password: "12345678",
   }
 };
-
+//all the helper functions
 const generateRandomString = () => {
   const alphaNumeric = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const result = [];
@@ -49,10 +55,18 @@ const getUserByEmail = (email) => {
   return null;
 };
 
+const urlsForUser = (id) => { //enter userID and use new variable that can be changed
+  let result = []
+  for (let user of Object.keys(urlDatabase)){
+    if(urlDatabase[user].userID === id){
+      result.push(user)
+    } 
+    } return (result)
+};
 
-app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: true }));
-
+console.log("old",urlsForUser("userRandomID"))
+console.log("new stuff",urlsForUser("user2RandomID"))
+// app.get and post 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -68,7 +82,11 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const loggedUser = req.cookies.user_id;
-  const templateVars = { urls: urlDatabase, users, loggedUser};
+  if(!loggedUser){
+    return res.status(401).send('401 - Please login in order to view this page.');
+}  
+  const linkArray = urlsForUser(loggedUser)
+  const templateVars = { urls: linkArray, users, loggedUser, urlDatabase};
   res.render("urls_index", templateVars);
 });
 
