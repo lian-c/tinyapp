@@ -1,4 +1,4 @@
-const getUserByEmail = (email, database) => {
+const getUserByEmail = (email, database) => { //returns object instead of only user due to more dynamic usage
   for (let id of Object.keys(database)) {
     // console.log(users[id].email)
     if (database[id].email === email) {
@@ -28,4 +28,4 @@ const urlsForUser = (id,database) => { //enter userID and use new variable that 
     }
   } return (result);
 };
-module.exports = {getUserByEmail, urlsForUser, generateRandomString}
+module.exports = {getUserByEmail, urlsForUser, generateRandomString};

@@ -3,7 +3,7 @@ const cookieSession = require('cookie-session');
 const app = express();
 const morgan = require('morgan');
 const bcrypt = require("bcryptjs");
-const {getUserByEmail, urlsForUser, generateRandomString} = require('./helpers.js')
+const {getUserByEmail, urlsForUser, generateRandomString} = require('./helpers.js');
 
 //middleware
 app.use(cookieSession({
