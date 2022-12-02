@@ -134,10 +134,10 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].longURL;
   const keys = Object.keys(urlDatabase);
   for (let key of keys) {
     if (key === shortURL) {
+      const longURL = urlDatabase[shortURL].longURL;
       res.redirect(302, longURL);
       return;
     }
