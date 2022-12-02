@@ -11,7 +11,7 @@ app.use(cookieSession({
   keys: ["beluga"],// secret keys
 
   // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours for cookies to stay if not logged out 
 }));
 app.use(morgan('dev'));
 app.set("view engine", "ejs");

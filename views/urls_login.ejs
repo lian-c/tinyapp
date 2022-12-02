@@ -21,14 +21,16 @@
 
   <body>
 
-
-     Log in here:
+    <main style="margin: 1em;">
+      <h3 style="font-family: Helvetica, sans-serif; color: #212121;">Log in here:</h3>
       <form class="form-inline" action="/login" method="POST">
-        <input type="email" name="email" placeholder="email">
-        <input type="password" name="password" placeholder="password">
-        <button type="submit" class="btn btn-primary">Login</button>
+        Email address
+        <input type="email" name="email" placeholder="user@email.com" style="width: 200px; margin: 1em">
+        Password
+        <input type="password" name="password" placeholder="password" style="width: 175px; margin: 1em">
+        <button type="submit" style="background-color: rgb(41, 41, 41); color:#FF80BF" class="btn btn">Login</button>
       </form>
-       
+    </main>
   
 
     <!-- Bootstrap JS -->
